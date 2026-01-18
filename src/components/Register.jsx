@@ -3,7 +3,8 @@ import { useState } from "react";
 import Logo from "./Logo";
 import "./styles/Register.css";
 
-const Register = () => {
+// Desestruture a prop.
+const Register = ({ handleRegistration }) => {
   const [data, setData] = useState({
     username: "",
     email: "",
@@ -11,6 +12,9 @@ const Register = () => {
     confirmPassword: "",
   });
 
+  // Essa função é disparada quando houver alteração em uma entrada, atualizando
+  // o valor da entrada em questão. Observe que as chaves desse
+  // objeto correspondem aos atributos de nome das respectivas entradas.
   const handleChange = (e) => {
     const { name, value } = e.target;
     setData((prevData) => ({
@@ -19,11 +23,20 @@ const Register = () => {
     }));
   };
 
+  // Declare uma função de manipulador de envio. Essa função só precisa
+  // evitar o comportamento padrão do navegador e chamar
+  // handleRegistration, passando para ele os dados de envio
+  // do formulário.
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleRegistration(data);
+  };
+
   return (
     <div className="register">
       <Logo title={"CryptoDucks"} />
-      <p className="register__welcome">Por favor, registre-se</p>
-      <form className="register__form">
+      <p className="register__welcome">Por favor, registre-se.</p>
+      <form className="register__form" onSubmit={handleSubmit}>
         <label htmlFor="username">Nome de usuário:</label>
         <input
           id="username"
