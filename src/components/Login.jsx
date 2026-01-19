@@ -3,7 +3,7 @@ import { useState } from "react";
 import Logo from "./Logo";
 import "./styles/Login.css";
 
-const Login = () => {
+const Login = ({ handleLogin }) => {
   const [data, setData] = useState({
     username: "",
     password: "",
@@ -17,6 +17,13 @@ const Login = () => {
     }));
   };
 
+  // handleSubmit evita o comportamento padrão do navegador e chama
+  // o manipulador de login.
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLogin(data);
+  };
+
   return (
     <div className="login">
       <Logo title={"CryptoDucks"} />
@@ -24,7 +31,8 @@ const Login = () => {
         Esse aplicativo contém informações altamente confidenciais. Faça o login
         ou registre-se para acessar o CryptoDucks.
       </p>
-      <form className="login__form">
+      {/* Adicione o manipulador de envio como o atributo onSubmit do formulário.  */}
+      <form className="login__form" onSubmit={handleSubmit}>
         <label htmlFor="username">Login:</label>
         <input
           id="username"
