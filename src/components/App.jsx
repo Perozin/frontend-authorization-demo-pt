@@ -1,5 +1,11 @@
 import { useState, useEffect } from "react";
-import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
+import {
+  Routes,
+  Route,
+  Navigate,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
 
 import Ducks from "./Ducks";
 import Login from "./Login";
@@ -12,10 +18,13 @@ import { setToken, getToken } from "../utils/token";
 import "./styles/App.css";
 
 function App() {
-  const [userData, setUserData] = useState({ usermane: "", email: "" });
+  const [userData, setUserData] = useState({ username: "", email: "" });
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   const navigate = useNavigate();
+  // Invoque o hook. É preciso fazer isso em ambos
+  // os componentes.
+  const location = useLocation();
 
   const handleRegistration = ({
     username,
@@ -53,7 +62,12 @@ function App() {
           setToken(data.jwt); // Salve o token no armazenamento local
           setUserData(data.user); // Salve os dados do usuário no estado
           setIsLoggedIn(true); // Permita o login do usuário
-          navigate("/ducks"); // Mande o usuário para /ducks
+          // Depois do login, em vez de sempre acessar /ducks,
+          // navegue até o local armazenado no estado. Se
+          // não houver um local armazenado, vamos redirecionar
+          // para /ducks por padrão.
+          const redirectPath = location.state?.from?.pathname || "/ducks";
+          navigate(redirectPath);
         }
       })
       .catch((err) => console.log(err));
@@ -74,7 +88,6 @@ function App() {
         // dados no estado e mande ele para /ducks.
         setIsLoggedIn(true);
         setUserData({ username, email });
-        navigate("/ducks");
       })
       .catch(console.error);
   }, []);
@@ -97,20 +110,30 @@ function App() {
           </ProtectedRoute>
         }
       />
+      {/* Envolva a rota /login em uma ProtectedRoute. Lembre-se de 
+      especificar a prop anonymous para redirecionar os usuários logados
+      para "/". */}
       <Route
         path="/login"
         element={
-          <div className="loginContainer">
-            <Login handleLogin={handleLogin} />
-          </div>
+          <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
+            <div className="loginContainer">
+              <Login handleLogin={handleLogin} />
+            </div>
+          </ProtectedRoute>
         }
       />
+      {/* Envolva a rota /register em uma ProtectedRoute. Lembre-se de
+      especificar a prop anonymous para redirecionar os usuários logados 
+      para "/". */}
       <Route
         path="/register"
         element={
-          <div className="registerContainer">
-            <Register handleRegistration={handleRegistration} />
-          </div>
+          <ProtectedRoute isLoggedIn={isLoggedIn} anonymous>
+            <div className="registerContainer">
+              <Register handleRegistration={handleRegistration} />
+            </div>
+          </ProtectedRoute>
         }
       />
       <Route
