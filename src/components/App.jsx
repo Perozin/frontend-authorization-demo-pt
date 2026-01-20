@@ -1,11 +1,14 @@
+import { useState, useEffect } from "react";
 import { Routes, Route, Navigate, useNavigate } from "react-router-dom";
-import { useState } from "react";
+
 import Ducks from "./Ducks";
 import Login from "./Login";
 import MyProfile from "./MyProfile";
 import Register from "./Register";
 import ProtectedRoute from "./ProtectedRoute";
 import * as auth from "../utils/auth";
+import * as api from "../utils/api";
+import { setToken, getToken } from "../utils/token";
 import "./styles/App.css";
 
 function App() {
@@ -47,13 +50,34 @@ function App() {
       .then((data) => {
         // Verifique se um JWT está incluso antes de permitir o login do usuário.
         if (data.jwt) {
+          setToken(data.jwt); // Salve o token no armazenamento local
           setUserData(data.user); // Salve os dados do usuário no estado
           setIsLoggedIn(true); // Permita o login do usuário
           navigate("/ducks"); // Mande o usuário para /ducks
         }
       })
-      .catch(console.error);
+      .catch((err) => console.log(err));
   };
+
+  useEffect(() => {
+    const jwt = getToken();
+
+    if (!jwt) {
+      return;
+    }
+
+    // Chame a função, passando-a para o JWT.
+    api
+      .getUserInfo(jwt)
+      .then(({ username, email }) => {
+        // Se a resposta for bem-sucedida, permita o login do usuário, salve seus
+        // dados no estado e mande ele para /ducks.
+        setIsLoggedIn(true);
+        setUserData({ username, email });
+        navigate("/ducks");
+      })
+      .catch(console.error);
+  }, []);
 
   return (
     <Routes>
